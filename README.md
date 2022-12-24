@@ -1,8 +1,13 @@
 # Sudoku App iOS
-This is a simple Sudoku app for iOS. It is written in Flutter and uses the sudoku-api.vercel.app API to generate the puzzles.
+This is a simple Sudoku app for iOS. It is written in Dart using Flutter and the sudoku-api.vercel.app API to generate the puzzles.
 
 ## Features
 A sudoku every day with ranking and challenges:
+
+* Daily Sudoku
+* Ranking
+* Challenges
+* User profile
 
 ## Screenshots
 
