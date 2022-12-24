@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:sudoku_app/components/board.dart';
-import 'package:sudoku_app/components/navbar.dart';
-import 'package:sudoku_app/ranking.dart';
-import 'package:sudoku_app/stats.dart';
+import 'package:sudoku_app/components/ranking.dart';
+import 'package:sudoku_app/components/stats.dart';
 
 class GamePage extends StatefulWidget {
-  GamePage({super.key});
+  GamePage({super.key, required this.uid});
+
+  final String uid;
 
   @override
   State<GamePage> createState() => _GamePageState();
@@ -48,17 +49,19 @@ class _GamePageState extends State<GamePage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 if (pageGame == 0) ...[
-                  SizedBox(
+                  const SizedBox(
                     height: 100,
                     width: 100,
                     child: StatsPage(),
                   ),
                 ],
-                if (pageGame == 1) ...[
-                  Board(),
-                ],
+                Visibility(
+                  child: Board(uid: widget.uid),
+                  visible: pageGame == 1,
+                  maintainState: true,
+                ),
                 if (pageGame == 2) ...[
-                  SizedBox(
+                  const SizedBox(
                     height: 100,
                     width: 100,
                     child: RankingPage(),
@@ -72,19 +75,48 @@ class _GamePageState extends State<GamePage> {
                         onPressed: () {
                           showStatsPage();
                         },
-                        child: const Text('Stats'),
+                        child: const Text(
+                          '\u{1F31F}',
+                          style: TextStyle(fontSize: 30),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          primary: pageGame == 0
+                              ? Color.fromARGB(255, 129, 190, 241)
+                              : Colors.transparent,
+                          onPrimary: Colors.black,
+                          shadowColor: Colors.transparent,
+                        ),
                       ),
                       ElevatedButton(
                         onPressed: () {
                           showBoardPage();
                         },
-                        child: const Text('Today'),
+                        child: const Text('\u{1F5D3}',
+                            style: TextStyle(fontSize: 30)),
+                        style: ElevatedButton.styleFrom(
+                          primary: pageGame == 1
+                              ? Color.fromARGB(255, 129, 190, 241)
+                              : Colors.transparent,
+                          onPrimary: Colors.black,
+                          shadowColor: Colors.transparent,
+                        ),
                       ),
                       ElevatedButton(
                         onPressed: () {
                           showRankingPage();
                         },
-                        child: const Text('\u00a9'),
+                        child: const Text(
+                          '\u{1F3C6}',
+                          style: TextStyle(fontSize: 30),
+                        ),
+                        // width of the button fixed to the text
+                        style: ElevatedButton.styleFrom(
+                          primary: pageGame == 2
+                              ? Color.fromARGB(255, 129, 190, 241)
+                              : Colors.transparent,
+                          onPrimary: Colors.black,
+                          shadowColor: Colors.transparent,
+                        ),
                       ),
                     ],
                   ),

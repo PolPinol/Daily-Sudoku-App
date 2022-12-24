@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sudoku_app/components/navbar.dart';
 
 class StatsPage extends StatefulWidget {
   const StatsPage({super.key});

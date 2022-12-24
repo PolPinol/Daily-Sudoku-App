@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sudoku_app/components/navbar.dart';
 
 // ranking page
 

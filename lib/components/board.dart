@@ -3,25 +3,41 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'dart:developer';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Board extends StatefulWidget {
-  const Board({super.key});
+  final String uid;
+
+  const Board({super.key, required this.uid});
 
   @override
   State<Board> createState() => _BoardState();
 }
 
-class _BoardState extends State<Board> {
+class _BoardState extends State<Board> with WidgetsBindingObserver {
+  //
   List<List<int>> sudoku = [
-    [1, 0, 3, 4, 5, 6, 7, 8, 0],
-    [0, 2, 0, 4, 5, 6, 7, 8, 0],
-    [1, 0, 3, 0, 5, 6, 7, 0, 9],
-    [1, 2, 3, 4, 5, 6, 0, 8, 9],
-    [1, 0, 3, 4, 5, 0, 7, 8, 9],
-    [1, 2, 0, 4, 5, 0, 7, 0, 9],
-    [1, 0, 3, 4, 5, 0, 0, 8, 9],
-    [1, 2, 0, 4, 5, 6, 7, 8, 9],
-    [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    List<int>.filled(9, 0),
+    List<int>.filled(9, 0),
+    List<int>.filled(9, 0),
+    List<int>.filled(9, 0),
+    List<int>.filled(9, 0),
+    List<int>.filled(9, 0),
+    List<int>.filled(9, 0),
+    List<int>.filled(9, 0),
+    List<int>.filled(9, 0)
+  ];
+
+  List<List<int>> solutions = [
+    List<int>.filled(9, 1),
+    List<int>.filled(9, 0),
+    List<int>.filled(9, 0),
+    List<int>.filled(9, 0),
+    List<int>.filled(9, 0),
+    List<int>.filled(9, 0),
+    List<int>.filled(9, 0),
+    List<int>.filled(9, 0),
+    List<int>.filled(9, 0)
   ];
 
   Future<String> generateSudoku() async {
@@ -33,17 +49,18 @@ class _BoardState extends State<Board> {
       HttpClientResponse response = await request.close();
       String reply = await response.transform(utf8.decoder).join();
       client.close();
-      log('isSuccess: ${response.statusCode}');
       return reply;
     } catch (exception) {
-      throw (exception.toString());
+      return 'Failed';
     }
   }
 
   int selected = -1;
+  int errors = 0;
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _timer.cancel();
     super.dispose();
   }
@@ -58,16 +75,161 @@ class _BoardState extends State<Board> {
     return "${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
   }
 
+  initGameOfDay() {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+    generateSudoku().then((result) {
+      final parsed = jsonDecode(result);
+      final dataVal = parsed['newboard']['grids'][0]['value'];
+      final dataSol = parsed['newboard']['grids'][0]['solution'];
+
+      List<List<int>> tempSudoku = [];
+      List<dynamic> temp = json.decode(dataVal.toString());
+      temp.forEach((element) {
+        List<dynamic> temp2 = json.decode(element.toString());
+        tempSudoku.add(temp2.map((e) => e as int).toList());
+      });
+      sudoku = tempSudoku;
+
+      List<List<int>> tempSolutions = [];
+      List<dynamic> temp3 = json.decode(dataSol.toString());
+      temp3.forEach((element) {
+        List<dynamic> temp4 = json.decode(element.toString());
+        tempSolutions.add(temp4.map((e) => e as int).toList());
+      });
+      solutions = tempSolutions;
+
+      log(dataSol.toString());
+
+      CollectionReference games =
+          FirebaseFirestore.instance.collection('games');
+
+      Future<void> addGame() {
+        return games
+            .add({
+              'dataVal': dataVal.toString(),
+              'dataSol': dataSol.toString(),
+              'uid': widget.uid,
+              'date':
+                  "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}",
+              'time': 0,
+              'errors': 0
+            })
+            .then((value) => print("Game Added"))
+            .catchError((error) => print("Failed to add game: $error"));
+      }
+
+      addGame();
+
+      _timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) async {
+        setState(() {
+          _start++;
+        });
+      });
+
+      setState(() {});
+    });
+  }
+
+  recoverDraftGameOrInitGame() {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    WidgetsBinding.instance.addObserver(this);
+
+    CollectionReference games = FirebaseFirestore.instance.collection('games');
+
+    Future<void> recoverDraftGame() {
+      return games
+          .where('uid', isEqualTo: widget.uid)
+          .where('date',
+              isEqualTo:
+                  "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}")
+          .get()
+          .then((QuerySnapshot querySnapshot) {
+        for (var doc in querySnapshot.docs) {
+          _start = doc['time'].toInt();
+          errors = doc['errors'].toInt();
+
+          final dataVal = doc['dataVal'];
+          final dataSol = doc['dataSol'];
+
+          List<List<int>> tempSudoku = [];
+          List<dynamic> temp = json.decode(dataVal.toString());
+          temp.forEach((element) {
+            List<dynamic> temp2 = json.decode(element.toString());
+            tempSudoku.add(temp2.map((e) => e as int).toList());
+          });
+          sudoku = tempSudoku;
+
+          List<List<int>> tempSolutions = [];
+          List<dynamic> temp3 = json.decode(dataSol.toString());
+          temp3.forEach((element) {
+            List<dynamic> temp4 = json.decode(element.toString());
+            tempSolutions.add(temp4.map((e) => e as int).toList());
+          });
+          solutions = tempSolutions;
+
+          log(dataSol.toString());
+
+          _timer =
+              Timer.periodic(const Duration(seconds: 1), (Timer timer) async {
+            setState(() {
+              _start++;
+            });
+          });
+
+          setState(() {});
+        }
+        if (querySnapshot.docs.isEmpty) {
+          initGameOfDay();
+        }
+      });
+    }
+
+    recoverDraftGame();
+  }
+
+  saveGame() {
+    CollectionReference games = FirebaseFirestore.instance.collection('games');
+
+    Future<void> updateGame() {
+      return games
+          .where('uid', isEqualTo: widget.uid)
+          .get()
+          .then((QuerySnapshot querySnapshot) {
+        for (var doc in querySnapshot.docs) {
+          doc.reference.update({
+            'dataVal': sudoku.toString(),
+            'dataSol': solutions.toString(),
+            'date':
+                "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}",
+            'errors': errors,
+            'time': _start,
+          });
+        }
+      });
+    }
+
+    updateGame();
+  }
+
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) async {
-      setState(() {
-        _start++;
-      });
-    });
-    log('hola');
-    generateSudoku().then((value) => log('data: $value'));
+    recoverDraftGameOrInitGame();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        // nothing
+        break;
+      case AppLifecycleState.paused:
+        saveGame();
+        break;
+      default:
+        break;
+    }
   }
 
   @override
@@ -76,11 +238,14 @@ class _BoardState extends State<Board> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          const SizedBox(
+            height: 50,
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Errors: 0/3',
+                'Errors: ${errors}/3',
                 style: TextStyle(fontSize: 15),
               ),
               SizedBox(
@@ -91,6 +256,9 @@ class _BoardState extends State<Board> {
                 ),
               )
             ],
+          ),
+          const SizedBox(
+            height: 10,
           ),
           GridView.count(
             shrinkWrap: true,
@@ -150,6 +318,9 @@ class _BoardState extends State<Board> {
               );
             }),
           ),
+          const SizedBox(
+            height: 50,
+          ),
           // numbers in a row to select text button with number and onpressed
           Container(
             child: Row(
@@ -161,13 +332,18 @@ class _BoardState extends State<Board> {
                       setState(() {
                         if (selected != -1 &&
                             sudoku[selected ~/ 9][selected % 9] == 0) {
-                          sudoku[selected ~/ 9][selected % 9] = (index + 1);
+                          if ((index + 1) !=
+                              solutions[selected ~/ 9][selected % 9]) {
+                            errors++;
+                          } else {
+                            sudoku[selected ~/ 9][selected % 9] = (index + 1);
+                          }
                         }
                       });
                     },
                     child: Text(
                       (index + 1).toString(),
-                      style: TextStyle(fontSize: 24),
+                      style: TextStyle(fontSize: 24, color: Colors.black),
                     ),
                   ),
                 );
