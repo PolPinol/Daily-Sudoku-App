@@ -1,16 +1,28 @@
-# sudoku_app
+# Sudoku App iOS
+This is a simple Sudoku app for iOS. It is written in Flutter and uses the sudoku-api.vercel.app API to generate the puzzles.
 
-A new Flutter project.
+## Features
+A sudoku every day with ranking and challenges:
 
-## Getting Started
+## Screenshots
 
-This project is a starting point for a Flutter application.
 
-A few resources to get you started if this is your first Flutter project:
+## Requirements
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+* Xcode 8.0 or later
+* iOS 10.0 or later
+* Swift 3.0 or later
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Installation
+
+1. Clone the repository
+2. Open the project in Xcode
+3. Build and run the project
+
+## Acknowledgments
+
+* This project is based on the Sudoku app for iOS and Android by Pol Piñol i Armand Daussà.
+* The Sudoku puzzles are generated using the public API sudoku-api.vercel.app.
+
+
+
