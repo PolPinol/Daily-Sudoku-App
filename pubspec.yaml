@@ -38,7 +38,13 @@ dependencies:
   cupertino_icons: ^1.0.2
   firebase_core: ^2.4.0
   firebase_auth: ^4.2.2
+  firebase_admin: ^0.2.0
   cloud_firestore: ^4.3.0
+  shared_preferences: ^2.0.16
+  dot_navigation_bar: ^1.0.1+4 # Per canviar el menú de navegació de sota
+  confetti: ^0.7.0
+  cool_alert: ^1.1.0
+  material_design_icons_flutter: ^6.0.7096
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -20,14 +21,10 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget build(BuildContext context) {
     // sign in page
     return Scaffold(
-        body: SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.only(
-          left: 20.0,
-          right: 20.0,
-          top: 50.0,
-          bottom: 50.0,
-        ),
+        body: Center(
+      child: SingleChildScrollView(
+        reverse: true,
+        padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -39,7 +36,7 @@ class _SignUpPageState extends State<SignUpPage> {
             Padding(
               padding: const EdgeInsets.only(top: 20.0, bottom: 10.0),
               child: TextField(
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Email',
                 ),
@@ -80,7 +77,7 @@ class _SignUpPageState extends State<SignUpPage> {
               Text(errMsg, style: const TextStyle(color: Colors.red)),
             ],
             if (!error) ...[
-              Text(' ', style: const TextStyle(color: Colors.red)),
+              const Text(' ', style: TextStyle(color: Colors.red)),
             ],
             // Sign-up button
             Padding(
@@ -106,17 +103,16 @@ class _SignUpPageState extends State<SignUpPage> {
                       setState(() {
                         error = false;
                       });
-                      final newUser =
-                          await _auth.createUserWithEmailAndPassword(
-                              email: email!, password: password!);
-                      if (newUser != null) {
-                        Navigator.pop(context);
-                      } else {
-                        setState(() {
-                          errMsg = "Error from firebase";
-                          error = true;
-                        });
-                      }
+                      await _auth.createUserWithEmailAndPassword(
+                          email: email!, password: password!);
+                      // ignore: use_build_context_synchronously
+                      CollectionReference games =
+                          FirebaseFirestore.instance.collection('games');
+                      games.add({
+                        'mail': email,
+                        'uid': _auth.currentUser!.uid,
+                      });
+                      Navigator.pop(context);
                     } catch (e) {
                       var err = e.toString().split("]");
                       setState(() {
