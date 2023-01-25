@@ -65,7 +65,7 @@ class _StatsPageState extends State<StatsPage> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Partidas', style: TextStyle(fontSize: 20)),
+              const Text('Games', style: TextStyle(fontSize: 20)),
               const SizedBox(height: 10),
               Container(
                 decoration: BoxDecoration(
@@ -79,7 +79,7 @@ class _StatsPageState extends State<StatsPage> {
                     MdiIcons.tableLarge,
                     color: Colors.blue,
                   ),
-                  title: const Text('Partidas empezadas'),
+                  title: const Text('Games started'),
                   trailing: Text('$_gamesStarted'),
                 ),
               ),
@@ -93,7 +93,7 @@ class _StatsPageState extends State<StatsPage> {
                   contentPadding:
                       const EdgeInsets.only(left: 16.0, right: 16.0),
                   leading: const Icon(MdiIcons.trophy, color: Colors.blue),
-                  title: const Text('Partidas ganadas'),
+                  title: const Text('Games won'),
                   trailing: Text('$_gamesWon'),
                 ),
               ),
@@ -107,12 +107,12 @@ class _StatsPageState extends State<StatsPage> {
                   contentPadding:
                       const EdgeInsets.only(left: 16.0, right: 16.0),
                   leading: const Icon(MdiIcons.flag, color: Colors.blue),
-                  title: const Text('Tasa de victorias'),
+                  title: const Text('Win rate'),
                   trailing: Text('$_winRate%'),
                 ),
               ),
               const SizedBox(height: 30),
-              const Text('Tiempo', style: TextStyle(fontSize: 20)),
+              const Text('Time', style: TextStyle(fontSize: 20)),
               const SizedBox(height: 10),
               Container(
                 decoration: BoxDecoration(
@@ -123,7 +123,7 @@ class _StatsPageState extends State<StatsPage> {
                   contentPadding:
                       const EdgeInsets.only(left: 16.0, right: 16.0),
                   leading: const Icon(MdiIcons.timer, color: Colors.blue),
-                  title: const Text('Mejor tiempo'),
+                  title: const Text('Best time'),
                   trailing: Text(_printDuration(Duration(seconds: _bestTime))),
                 ),
               ),
@@ -137,7 +137,7 @@ class _StatsPageState extends State<StatsPage> {
                   contentPadding:
                       const EdgeInsets.only(left: 16.0, right: 16.0),
                   leading: const Icon(MdiIcons.clockPlus, color: Colors.blue),
-                  title: const Text('Tiempo medio'),
+                  title: const Text('Average time'),
                   trailing: Text(
                       _printDuration(Duration(seconds: _averageTime.toInt()))),
                 ),

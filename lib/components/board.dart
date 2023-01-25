@@ -34,6 +34,7 @@ class _BoardState extends State<Board>
   late ConfettiController _controllerCenter;
   bool _isSolved = false;
   bool _isLocked = false;
+  String _username = '';
 
   @override
   bool get wantKeepAlive => true;
@@ -211,6 +212,19 @@ class _BoardState extends State<Board>
             });
           }
         }
+
+        CollectionReference users =
+            FirebaseFirestore.instance.collection('users');
+        users
+            .where('uid', isEqualTo: widget.uid)
+            .get()
+            .then((QuerySnapshot querySnapshot) {
+          for (var doc in querySnapshot.docs) {
+            setState(() {
+              _username = doc['mail'].split('@')[0];
+            });
+          }
+        });
       });
     }
 
@@ -296,10 +310,13 @@ class _BoardState extends State<Board>
     return Stack(children: [
       Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text('Hi $_username',
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(
-              height: 50,
+              height: 20,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

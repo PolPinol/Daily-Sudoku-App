@@ -102,7 +102,7 @@ class _SignInPageState extends State<SignInPage> {
                         setState(() {
                           _isLoading = false;
                         });
-
+                        Navigator.pop(context);
                         Navigator.push(
                           context,
                           MaterialPageRoute(

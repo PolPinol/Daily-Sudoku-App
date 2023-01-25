@@ -34,17 +34,20 @@ class Rank implements Comparable<Rank> {
 // ranking page
 
 class RankingPage extends StatefulWidget {
-  const RankingPage({super.key});
+  const RankingPage({super.key, required this.uid});
+
+  final String uid;
 
   @override
   State<RankingPage> createState() => _RankingPageState();
 }
 
-class _RankingPageState extends State<RankingPage> {
+class _RankingPageState extends State<RankingPage> with WidgetsBindingObserver {
   final List<Rank> _ranks = [];
   final credential = Credentials.applicationDefault();
 
   _loadRanking() async {
+    WidgetsBinding.instance.addObserver(this);
     CollectionReference games = FirebaseFirestore.instance.collection('games');
     CollectionReference users = FirebaseFirestore.instance.collection('users');
     QuerySnapshot qs = await users.get();
@@ -95,6 +98,12 @@ class _RankingPageState extends State<RankingPage> {
   }
 
   @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
@@ -124,56 +133,24 @@ class _RankingPageState extends State<RankingPage> {
                   return ListTile(
                     contentPadding:
                         const EdgeInsets.only(left: 16.0, right: 16.0),
-                    title: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        if (index < 3) ...[
-                          Expanded(
-                            flex: 1,
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Icon(MdiIcons.trophy,
-                                  color: index == 0
-                                      ? Colors.yellow
-                                      : (index == 1
-                                          ? Colors.grey
-                                          : Colors.brown),
-                                  size: 32),
-                            ),
+                    leading: index < 3
+                        ? Icon(
+                            MdiIcons.trophy,
+                            color: index == 0
+                                ? Colors.yellow
+                                : index == 1
+                                    ? Colors.grey
+                                    : Colors.brown,
                           )
-                        ] else ...[
-                          Expanded(
-                              flex: 1,
-                              child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Text((index + 1).toString()))),
-                        ],
-                        Expanded(
-                          flex: 1,
-                          child: Text(
-                            _ranks[index].mail.split('@')[0],
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Expanded(
-                            flex: 1,
-                            child: Text(
-                              _ranks[index].gamesWon.toString(),
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.red,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                        : Text((index + 1).toString()),
+                    title: Text(_ranks[index].mail.split('@')[0],
+                        style: TextStyle(
+                          color: _ranks[index].uid == widget.uid
+                              ? Colors.blue
+                              : Colors.black,
+                          fontSize: 16,
+                        )),
+                    trailing: Text(_ranks[index].gamesWon.toString()),
                   );
                 }),
           ],

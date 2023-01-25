@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sudoku_app/signin.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -106,13 +107,18 @@ class _SignUpPageState extends State<SignUpPage> {
                       await _auth.createUserWithEmailAndPassword(
                           email: email!, password: password!);
                       // ignore: use_build_context_synchronously
-                      CollectionReference games =
-                          FirebaseFirestore.instance.collection('games');
-                      games.add({
+                      CollectionReference users =
+                          FirebaseFirestore.instance.collection('users');
+                      users.add({
                         'mail': email,
                         'uid': _auth.currentUser!.uid,
                       });
                       Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const SignInPage()),
+                      );
                     } catch (e) {
                       var err = e.toString().split("]");
                       setState(() {
