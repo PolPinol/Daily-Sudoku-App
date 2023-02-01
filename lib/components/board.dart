@@ -35,6 +35,10 @@ class _BoardState extends State<Board>
   bool _isSolved = false;
   bool _isLocked = false;
   String _username = '';
+  Timer? _timer;
+  int _start = 0;
+  int _selected = -1;
+  int _errors = 0;
 
   @override
   bool get wantKeepAlive => true;
@@ -78,21 +82,6 @@ class _BoardState extends State<Board>
       return 'Failed';
     }
   }
-
-  int selected = -1;
-  int errors = 0;
-
-  @override
-  void dispose() {
-    widget.fabNotifier.removeListener(saveGame);
-    WidgetsBinding.instance.removeObserver(this);
-    _timer?.cancel();
-    _controllerCenter.dispose();
-    super.dispose();
-  }
-
-  Timer? _timer;
-  int _start = 0;
 
   String _printDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, "0");
@@ -176,9 +165,9 @@ class _BoardState extends State<Board>
           log(querySnapshot.docs.length.toString());
           for (var doc in querySnapshot.docs) {
             _start = doc['time'].toInt();
-            errors = doc['errors'].toInt();
+            _errors = doc['errors'].toInt();
             _isSolved = doc['completed'];
-            _isLocked = errors >= 3 || _isSolved;
+            _isLocked = _errors >= 3 || _isSolved;
 
             final dataVal = doc['dataVal'];
             final dataSol = doc['dataSol'];
@@ -248,7 +237,7 @@ class _BoardState extends State<Board>
             'dataSol': solutions.toString(),
             'date':
                 "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}",
-            'errors': errors,
+            'errors': _errors,
             'time': _start,
             'completed': _isSolved,
           });
@@ -305,6 +294,15 @@ class _BoardState extends State<Board>
   }
 
   @override
+  void dispose() {
+    widget.fabNotifier.removeListener(saveGame);
+    WidgetsBinding.instance.removeObserver(this);
+    _timer?.cancel();
+    _controllerCenter.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     super.build(context);
     return Stack(children: [
@@ -322,7 +320,7 @@ class _BoardState extends State<Board>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Errors: $errors/3',
+                  'Errors: $_errors/3',
                   style: const TextStyle(fontSize: 15),
                 ),
                 SizedBox(
@@ -372,13 +370,15 @@ class _BoardState extends State<Board>
                     child: TextButton(
                       onPressed: () {
                         setState(() {
-                          selected == index ? selected = -1 : selected = index;
+                          _selected == index
+                              ? _selected = -1
+                              : _selected = index;
                         });
                       },
                       style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all<Color>(
-                            selected == index &&
-                                    sudoku[selected ~/ 9][selected % 9] == 0
+                            _selected == index &&
+                                    sudoku[_selected ~/ 9][_selected % 9] == 0
                                 ? (!_isLocked
                                     ? const Color.fromARGB(71, 0, 199, 254)
                                     : const Color.fromARGB(82, 254, 0, 21))
@@ -410,25 +410,26 @@ class _BoardState extends State<Board>
                     onPressed: () {
                       setState(() {
                         if (_isLocked) return;
-                        if (selected != -1 &&
-                            sudoku[selected ~/ 9][selected % 9] == 0) {
+                        if (_selected != -1 &&
+                            sudoku[_selected ~/ 9][_selected % 9] == 0) {
                           if ((index + 1) !=
-                              solutions[selected ~/ 9][selected % 9]) {
-                            errors++;
-                            if (errors >= 3) {
+                              solutions[_selected ~/ 9][_selected % 9]) {
+                            _errors++;
+                            if (_errors >= 3) {
                               saveGame();
                               _timer?.cancel();
-                              _isLocked = errors >= 3;
+                              _isLocked = _errors >= 3;
                               CoolAlert.show(
                                 context: context,
                                 type: CoolAlertType.error,
                                 title: 'Game Over!',
                                 text: 'No more attemps left!',
+                                onConfirmBtnTap: () => null,
                                 autoCloseDuration: const Duration(seconds: 4),
                               );
                             }
                           } else {
-                            sudoku[selected ~/ 9][selected % 9] = (index + 1);
+                            sudoku[_selected ~/ 9][_selected % 9] = (index + 1);
                             // If all the cells are filled, then check if the solution is correct
                             if (isSudokuSolved()) {
                               _isLocked = true;

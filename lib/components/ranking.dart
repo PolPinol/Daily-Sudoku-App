@@ -46,7 +46,7 @@ class _RankingPageState extends State<RankingPage> with WidgetsBindingObserver {
   final List<Rank> _ranks = [];
   final credential = Credentials.applicationDefault();
 
-  _loadRanking() async {
+  loadRanking() async {
     WidgetsBinding.instance.addObserver(this);
     CollectionReference games = FirebaseFirestore.instance.collection('games');
     CollectionReference users = FirebaseFirestore.instance.collection('users');
@@ -94,7 +94,7 @@ class _RankingPageState extends State<RankingPage> with WidgetsBindingObserver {
   void initState() {
     super.initState();
 
-    _loadRanking();
+    loadRanking();
   }
 
   @override

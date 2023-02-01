@@ -17,7 +17,7 @@ class GamePage extends StatefulWidget {
 
 class _GamePageState extends State<GamePage> {
   int _pageGame = 1;
-  final FloatingActionButtonNotifier fabNotifier =
+  final FloatingActionButtonNotifier _fabNotifier =
       FloatingActionButtonNotifier();
   final PageController _pageController = PageController(initialPage: 1);
 
@@ -46,7 +46,7 @@ class _GamePageState extends State<GamePage> {
                       return Board(
                           key: const PageStorageKey("BoardPage"),
                           uid: widget.uid,
-                          fabNotifier: fabNotifier);
+                          fabNotifier: _fabNotifier);
                     case 2:
                       return RankingPage(uid: widget.uid);
                     default:
@@ -61,7 +61,7 @@ class _GamePageState extends State<GamePage> {
             padding: const EdgeInsets.all(8.0),
             child: FloatingActionButton(
               onPressed: () {
-                fabNotifier.onFloationActionButtonPressed();
+                _fabNotifier.onFloationActionButtonPressed();
                 SharedPreferences.getInstance().then((prefs) {
                   prefs.setString('uid', '');
                 });
