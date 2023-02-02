@@ -71,7 +71,7 @@ class _GamePageState extends State<GamePage> {
                   MaterialPageRoute(builder: (context) => const SignInPage()),
                 );
               },
-              backgroundColor: Colors.red,
+              backgroundColor: Colors.blue,
               child: const Icon(Icons.logout),
             ),
           ),
