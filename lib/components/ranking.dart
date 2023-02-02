@@ -45,6 +45,7 @@ class RankingPage extends StatefulWidget {
 class _RankingPageState extends State<RankingPage> with WidgetsBindingObserver {
   final List<Rank> _ranks = [];
   final credential = Credentials.applicationDefault();
+  bool _disposed = false;
 
   loadRanking() async {
     WidgetsBinding.instance.addObserver(this);
@@ -87,18 +88,21 @@ class _RankingPageState extends State<RankingPage> with WidgetsBindingObserver {
     }
 
     _ranks.sort((a, b) => b.compareTo(a));
-    setState(() {});
+    if (!_disposed) {
+      setState(() {});
+    }
   }
 
   @override
   void initState() {
     super.initState();
-
+    _disposed = false;
     loadRanking();
   }
 
   @override
   void dispose() {
+    _disposed = true;
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
