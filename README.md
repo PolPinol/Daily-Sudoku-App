@@ -9,13 +9,11 @@ A sudoku every day with ranking and challenges:
 * Challenges
 * User profile
 
-## Screenshots
-
-
 ## Requirements
 
 * Xcode 8.0 or later
 * iOS 10.0 or later
+* Android SDK 33 or later
 * Swift 3.0 or later
 
 ## Installation

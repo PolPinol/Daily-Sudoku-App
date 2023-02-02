@@ -17,6 +17,7 @@ class _StatsPageState extends State<StatsPage> {
   num _winRate = 0;
   int _bestTime = 0;
   num _averageTime = 0;
+  bool _disposed = false;
 
   _loadStats() async {
     CollectionReference games = FirebaseFirestore.instance.collection('games');
@@ -40,7 +41,9 @@ class _StatsPageState extends State<StatsPage> {
       _averageTime = _averageTime ~/ _gamesWon;
     }
 
-    setState(() {});
+    if (!_disposed) {
+      setState(() {});
+    }
   }
 
   String _printDuration(Duration duration) {
@@ -53,7 +56,14 @@ class _StatsPageState extends State<StatsPage> {
   @override
   void initState() {
     super.initState();
+    _disposed = false;
     _loadStats();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
 
   @override
